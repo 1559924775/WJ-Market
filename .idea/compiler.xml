@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="account-manager-service" />
+        <module name="account-user-service" />
+        <module name="cart-service" />
+        <module name="market-api" />
+        <module name="order-service" />
+        <module name="package-service" />
+        <module name="stock-service" />
+      </profile>
+      <profile name="Annotation profile for WJ-Market" enabled="true">
+        <sourceOutputDir name="../gate-way/target/generated-sources/annotations" />
+        <sourceTestOutputDir name="../gate-way/target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="market-gateway" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="account-user-service" target="1.6" />
+      <module name="Gateway" target="1.6" />
+      <module name="ManagerAccountService" target="1.6" />
+      <module name="market-gateway" target="1.6" />
+      <module name="order-service" target="1.6" />
+      <module name="Service-Inteface" target="1.6" />
+      <module name="stock-service" target="1.6" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
