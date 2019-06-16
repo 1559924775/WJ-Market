@@ -12,6 +12,7 @@
         <option value="$PROJECT_DIR$/Gateway/pom.xml" />
         <option value="$PROJECT_DIR$/ManagerAccountService/pom.xml" />
         <option value="$PROJECT_DIR$/Service-Inteface/pom.xml" />
+        <option value="$PROJECT_DIR$/cart-service/pom.xml" />
       </set>
     </option>
   </component>

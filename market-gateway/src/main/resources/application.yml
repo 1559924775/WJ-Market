@@ -1,9 +1,9 @@
 server:
-  port: 9001
+  port: 9004
 
 spring:
   application:
-    name: stock-service
+    name: gateway
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/market?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=UTC
     username: root
@@ -16,9 +16,6 @@ spring:
   dubbo:
     server: true
     registry: zookeeper://47.110.255.222:2181
-    protocol:
-      name: dubbo
-      port: 20881
 
 mybatis:
   mapper-locations: classpath*:com/uestc/dao/*.xml

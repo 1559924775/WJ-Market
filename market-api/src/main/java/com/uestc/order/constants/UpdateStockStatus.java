@@ -1,4 +1,4 @@
-package com.uestc.constants;
+package com.uestc.order.constants;
 
 public enum UpdateStockStatus {
     SUCCESS("0"),
