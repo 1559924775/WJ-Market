@@ -10,14 +10,9 @@ public interface StockService {
 
     StockVO selectOne( String goodsId);
 
-    /**
-     * 更新库存，返回更新的行数
-     * @param currentVersion
-     * @param goodsId
-     * @param updateTime
-     * @return
-     */
-    int updateStoreCountByVersion(int currentVersion,String goodsId, Date updateTime,int num);
+    public int freezeStoreCountByVersion(int currentVersion,  String goodsId, Date updateTime,int newNum,int freezeNum);
 
+    public void reduceFreezeCount(String goodsId, Date updateTime,int freezeNum);
 
+    public void updateStockCount(String goodsId, Date updateTime,int freezeNum);
 }

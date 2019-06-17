@@ -13,7 +13,6 @@ public class OrderItemVO {
 
     private String title;
 
-
     private BigDecimal price;
 
 
@@ -22,9 +21,17 @@ public class OrderItemVO {
 
     private BigDecimal totalFee;
 
+
     private String picPath;
 
+
     private String sellerId;
+
+
+    private String statusTcc;
+
+
+    private String message;
 
 
 }

@@ -38,21 +38,50 @@ public class StockServiceImpl implements StockService {
     }
 
 
-    @Override
+    /**
+     * 冻结库存
+     * @param currentVersion
+     * @param goodsId
+     * @param updateTime
+     * @param newNum
+     * @return
+     */
+
     //example是找到对象，tbStock是对象的更新信息
-    public int updateStoreCountByVersion(int currentVersion,  String goodsId, Date updateTime,int newNum) {
+    public int freezeStoreCountByVersion(int currentVersion,  String goodsId, Date updateTime,int newNum,int freezeNum) {
         TbStock tbStock=new TbStock();
         tbStock.setVersion(currentVersion+1);
         tbStock.setUpdateTime(updateTime);
         tbStock.setStock(newNum);
+        tbStock.setFreezeNum(freezeNum);
 
         TbStockExample tbStockExample=new TbStockExample();
         TbStockExample.Criteria criteria=tbStockExample.createCriteria();
         criteria.andGoodsIdEqualTo(goodsId);
         criteria.andVersionEqualTo(currentVersion);
-        //CAS更新
+        //CAS冻结
         return tbStockMapper.updateByExampleSelective(tbStock,tbStockExample);
     }
 
+    //把的冻结的库存减掉
+    public  void reduceFreezeCount(String goodsId, Date updateTime,int freezeNum){
+        TbStock tbStock=tbStockMapper.selectByPrimaryKey(goodsId);
+        tbStock.setFreezeNum(tbStock.getFreezeNum()-freezeNum);
+        tbStock.setUpdateTime(new Date());
+        tbStockMapper.updateByPrimaryKeySelective(tbStock);
+
+    }
+
+    /**
+     * 把冻结的库存加回去
+     * @param goodsId
+     * @param updateTime
+     * @param freezeNum
+     */
+    public void updateStockCount(String goodsId, Date updateTime,int freezeNum){
+        TbStock tbStock=tbStockMapper.selectByPrimaryKey(goodsId);
+        tbStock.setStock(tbStock.getStock()+freezeNum);
+        tbStockMapper.updateByPrimaryKeySelective(tbStock);
+    }
 
 }

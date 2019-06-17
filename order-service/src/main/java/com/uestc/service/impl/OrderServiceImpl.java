@@ -11,8 +11,9 @@ import com.uestc.domain.TbOrderItem;
 import com.uestc.order.OrderService;
 import com.uestc.order.constants.UpdateStockStatus;
 import com.uestc.order.vo.OrderItemVO;
-import com.uestc.order.vo.OrderResultVO;
 import com.uestc.order.vo.OrderVO;
+import com.uestc.service.TbOrderItemService;
+import com.uestc.service.TbOrderService;
 import com.uestc.service.producer.OrderlyProducer;
 import com.uestc.service.utils.FastJsonConvertUtil;
 import com.uestc.stock.StockService;
@@ -29,16 +30,26 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
+/**
+ * 问题：现在下单时,对于每一个购物车，先拿到库存，把库存不足的数量设为0，设置为库存不足。
+ * 库存够的，插入订单表和订单详情表。
+ *
+ * 先用CAS操作冻结库存，在执行TCC事务插入两张表，插入成功在confirm方法中把冻结的去掉，插入失败，把冻结的加回去。
+ */
+
 @Service
 public class OrderServiceImpl implements OrderService {
 
 	@Autowired
-	private TbOrderMapper tbOrderMapper;
+	private TbOrderService tbOrderService;
 	@Autowired
-	private TbOrderItemMapper tbOrderItemMapper;
-	
+	private TbOrderItemService tbOrderItemService;
+
+	@Autowired
+	private TbOrderMapper tbOrderMapper;
 	@Reference
-	private StockService storeService;
+	private StockService stockService;
     
     @Autowired
     private OrderlyProducer orderlyProducer;
@@ -55,32 +66,30 @@ public class OrderServiceImpl implements OrderService {
 	 * @param orderVO 从前端传过来的包含一些公共信息
 	 * @return
 	 */
-	List<OrderResultVO> result=null;
+
 	@Override
-	public List<OrderResultVO> createOrder(OrderVO orderVO,String token) {
+	public void createOrder(OrderVO orderVO,String token) {
 		//接口调用去重 token在浏览页面时生成。
 		if(redisTemplate.boundSetOps("createOrder").isMember(token)){
-			return result;
+			return ;
 		}
 		redisTemplate.boundSetOps("createOrder").add(token);
-		result=new ArrayList<>();
+
 		//从redis中获取到购物车
 		List<Cart> cartList= (List<Cart>) redisTemplate.boundHashOps("cartList").get(orderVO.getUserId());
 
 		for(Cart cart:cartList){
 			//一个商家一个购物车
-			//把库存不够的剔除出去。
+			//先拿到库存，把库存不够num设置为0
 			udpateStockBeforeOrder(cart.getOrderItemList());
-			OrderResultVO orderResultVO=doCreateOrder(orderVO,cart);
-			result.add(orderResultVO);
+			doCreateOrder(orderVO,cart);
 		}
-		return result;
 	}
 
 	//TCC事务
 	@Override
     @Compensable(propagation = Propagation.REQUIRES_NEW,confirmMethod = "confirmDoCreateOrder", cancelMethod = "cancelDoCreateOrder", asyncConfirm = true)
-	public OrderResultVO  doCreateOrder(OrderVO orderVO,Cart cart){
+	public void  doCreateOrder(OrderVO orderVO,Cart cart){
 		//创建TbOrder 订单表
 		TbOrder tbOrder=new TbOrder();
 		tbOrder.setUserId(orderVO.getUserId());
@@ -91,7 +100,7 @@ public class OrderServiceImpl implements OrderService {
 		BigDecimal payment=new BigDecimal(0);
 		String id=UUID.randomUUID().toString();
 		//支付金额会更新，最后再插入。
-        //循环插入订单详情表
+		List<TbOrderItem> tbOrderItems=new ArrayList<>();
 		for(OrderItemVO orderItemVO:cart.getOrderItemList()){
 			String itemId=UUID.randomUUID().toString();
 			TbOrderItem tbOrderItem=new TbOrderItem();
@@ -103,31 +112,24 @@ public class OrderServiceImpl implements OrderService {
 			tbOrderItem.setNum(orderItemVO.getNum());
 			tbOrderItem.setStatusTcc("inserting");
 			payment.add(tbOrderItem.getTotalFee());
-			tbOrderItemMapper.insert(tbOrderItem);
+			tbOrderItems.add(tbOrderItem);
 		}
+		//插入订单详情表
+		tbOrderItemService.insertAll(tbOrderItems);
 		//重新计算金额
 		orderVO.setPayment(payment);
 		//插入订单表
-		tbOrder.setStatusTcc("inserting");
-		tbOrderMapper.insert(tbOrder);
+		tbOrderService.insert(tbOrder);
 
-		OrderResultVO orderResultVO =new OrderResultVO();
-		orderResultVO.setOrderItemVOs(cart.getOrderItemList());
-		orderVO.setSellerId(cart.getSellerId());
-		orderResultVO.setOrderVo(orderVO);
-		return  orderResultVO;
 	}
 
-	public OrderResultVO  confirmDoCreateOrder(OrderVO orderVO,Cart cart){
-		return null;
+	public void  confirmDoCreateOrder(OrderVO orderVO,Cart cart){
+
 	}
 
-	public OrderResultVO  cancelDoCreateOrder(OrderVO orderVO,Cart cart){
-		//删除inserting的行
-		return null;
+	public void   cancelDoCreateOrder(OrderVO orderVO,Cart cart){
+
 	}
-
-
 
 
 	/**
@@ -154,8 +156,9 @@ public class OrderServiceImpl implements OrderService {
 						if(status.equals(UpdateStockStatus.SUCCESS)){
 							//拿到库存
 						}
-						//库存不够的移除
-						orderItemVOs.remove(orderItemVO);
+						//库存不够num设置为0
+						orderItemVO.setNum(0);
+						orderItemVO.setMessage("库存不足");
 					}
 					countDownLatch.countDown();
 				}
@@ -178,13 +181,13 @@ public class OrderServiceImpl implements OrderService {
 	 */
 	@Override
 	public UpdateStockStatus updateStock(OrderItemVO orderItemVO){
-		StockVO stockVO=storeService.selectOne(orderItemVO.getGoodsId());
+		StockVO stockVO=stockService.selectOne(orderItemVO.getGoodsId());
 		int num=stockVO.getStock()-orderItemVO.getNum();
 		if(num>=0) {
 			//得到一些库存，CAS操作，并发量不多
 			int currentVersion = stockVO.getVersion();
-			int updateRetCount = storeService.updateStoreCountByVersion(currentVersion,
-					orderItemVO.getGoodsId() + "", new Date(), num);
+			int updateRetCount = stockService.freezeStoreCountByVersion(currentVersion,
+					orderItemVO.getGoodsId() + "", new Date(), num,orderItemVO.getNum());
 
 			if (updateRetCount == 1) {  //数据库有一条数据被更新。
 				return UpdateStockStatus.SUCCESS;
