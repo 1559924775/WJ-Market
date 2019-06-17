@@ -1,7 +1,7 @@
 # WJ-Market
 微服务架构电商网站下单支付和支付业务<br/>
 开发工具：IDEA
-依赖工具：spring-boot、mybatis、maven、redis、dubbo、rocketmq、mysql、tcc-trasaction
+依赖工具：spring-boot、mybatis、maven、redis、dubbo、rocketmq、mysql、tcc-trasaction、mycat
 
 核心业务介绍：<br/>
 下单业务：order<br/>
