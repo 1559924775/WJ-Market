@@ -3,7 +3,10 @@
 开发工具：IDEA
 依赖工具：spring-boot、mybatis、maven、redis、dubbo、rocketmq、mysql、tcc-trasaction、mycat
 
-核心业务介绍：<br/>
+## 核心业务流程：<br/>
+<img src="https://github.com/1559924775/WJ-Crawler/blob/master/work-stealing.png" width="600" alt="工作窃取"/><br/>
+
+## 核心业务介绍：<br/>
 下单业务：order<br/>
 用户下单后从redis中取出对应的购物车列表（一个供应商对应一个购物车，所以是购物车列表），针对每一个购物车，
 先用CAS操作冻结购物车中商品的库存，库存不足者将该商品的数量设为0。冻结库存后，将购物车中数据插入到订单表和订单详情表中，通过TCC-trasaction框架构建分布式事务。<br/>
