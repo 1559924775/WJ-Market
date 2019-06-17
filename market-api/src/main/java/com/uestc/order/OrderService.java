@@ -6,9 +6,11 @@ import com.uestc.order.vo.OrderItemVO;
 import com.uestc.order.vo.OrderResultVO;
 import com.uestc.order.vo.OrderVO;
 import org.mengyun.tcctransaction.api.Compensable;
+import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
-
+@Repository
 public interface OrderService {
 
 	void  createOrder(OrderVO orderVO, String token);

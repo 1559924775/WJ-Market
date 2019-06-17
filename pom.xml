@@ -9,10 +9,10 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>order-service</module>
-        <module>stock-service</module>
-        <module>account-user-service</module>
-        <module>account-manager-service</module>
+        <module>order</module>
+        <module>stock</module>
+        <module>pay-user</module>
+        <module>pay-manager</module>
         <module>market-api</module>
         <module>market-gateway</module>
         <module>package-service</module>
