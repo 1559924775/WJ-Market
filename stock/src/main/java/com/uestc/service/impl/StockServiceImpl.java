@@ -14,8 +14,6 @@ import java.util.List;
 public class StockServiceImpl implements StockService {
     @Autowired
     TbStockMapper tbStockMapper;
-
-
     @Override
     public StockVO selectOne(String goodsId) {
         TbStockExample tbStockExample=new TbStockExample();

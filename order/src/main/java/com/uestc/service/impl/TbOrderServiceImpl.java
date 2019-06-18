@@ -6,7 +6,9 @@ import com.uestc.service.TbOrderService;
 import org.mengyun.tcctransaction.api.Compensable;
 import org.mengyun.tcctransaction.api.Propagation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class TbOrderServiceImpl implements TbOrderService {
     @Autowired
     TbOrderMapper tbOrderMapper;

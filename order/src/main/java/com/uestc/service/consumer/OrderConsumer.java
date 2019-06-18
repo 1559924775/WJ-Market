@@ -7,6 +7,7 @@ import com.uestc.domain.TbOrderExample;
 import com.uestc.order.OrderService;
 import com.uestc.order.constants.OrderStatus;
 import com.uestc.service.utils.FastJsonConvertUtil;
+import jdk.nashorn.internal.ir.annotations.Reference;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -39,7 +40,7 @@ public class OrderConsumer {
 	@Autowired
 	private TbOrderMapper tborderMapper;
 	
-	@Autowired
+	@Reference
 	private OrderService orderService;
 	
 	public OrderConsumer() throws MQClientException {

@@ -48,6 +48,7 @@ public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	private TbOrderMapper tbOrderMapper;
+
 	@Reference
 	private StockService stockService;
     

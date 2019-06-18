@@ -1,5 +1,8 @@
 server:
-  port: 9004
+  port: 9100
+
+
+
 
 spring:
   application:
@@ -17,18 +20,6 @@ spring:
     server: true
     registry: zookeeper://47.110.255.222:2181
 
-mybatis:
-  mapper-locations: classpath*:com/uestc/dao/*.xml
-#  config-location: classpath:mybatis-config.xml
 
-
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
-pagehelper:
-  helperDialect: mysql
-  reasonable: true
-  supportMethodsArguments: true
-  params: count=countSql
 
 

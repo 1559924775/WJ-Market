@@ -7,7 +7,7 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@MapperScan("com.uestc.dao")
+
 @Configuration
 public class OrderConfig {
     //	用来拦截处理HystrixCommand注解
